@@ -874,7 +874,7 @@ with app.app_context():
         )
         db.session.add(admin)
         db.session.commit()
-        print("Admin user created: admin@foodshare.com / admin123")
+      #  print("Admin user created: admin@foodshare.com / admin123")
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)

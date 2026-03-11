@@ -1,0 +1,259 @@
+
+{% extends "base.html" %}
+
+{% block page_title %}Confirm Delivery{% endblock %}
+
+{% block content %}
+<style>
+    .confirm-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .confirm-header {
+        background: linear-gradient(135deg, #FF6F00 0%, #e65100 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        color: white;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .confirm-header h2 {
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .donation-summary {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 1.5rem;
+    }
+
+    .donation-summary h3 {
+        color: var(--primary);
+        margin-bottom: 1rem;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        font-weight: 500;
+        color: var(--text-secondary);
+    }
+
+    .detail-value {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .rating-section {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 1.5rem;
+    }
+
+    .rating-section h3 {
+        color: var(--primary);
+        margin-bottom: 1rem;
+    }
+
+    .star-rating {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .star-rating input {
+        display: none;
+    }
+
+    .star-rating label {
+        font-size: 2rem;
+        color: #ddd;
+        cursor: pointer;
+        transition: color 0.3s;
+    }
+
+    .star-rating label:hover,
+    .star-rating label:hover ~ label,
+    .star-rating input:checked ~ label {
+        color: #ffd700;
+    }
+
+    .upload-section {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 1.5rem;
+    }
+
+    .upload-section h3 {
+        color: var(--primary);
+        margin-bottom: 1rem;
+    }
+
+    .upload-area {
+        border: 2px dashed #ddd;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .upload-area:hover {
+        border-color: var(--primary);
+        background: #f9f9f9;
+    }
+
+    .upload-area i {
+        font-size: 3rem;
+        color: #ddd;
+        margin-bottom: 1rem;
+    }
+
+    .upload-area p {
+        color: var(--text-secondary);
+    }
+
+    .preview-image {
+        margin-top: 1rem;
+        border-radius: 8px;
+        overflow: hidden;
+        display: none;
+    }
+
+    .preview-image img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(46, 125, 50, 0.3);
+    }
+</style>
+
+<div class="confirm-container">
+    <div class="confirm-header">
+        <h2><i class="fas fa-check-circle"></i> Confirm Delivery</h2>
+        <p>Please confirm you received the donation and share your feedback</p>
+    </div>
+
+    <!-- Donation Summary -->
+    <div class="donation-summary">
+        <h3><i class="fas fa-utensils"></i> Donation Details</h3>
+        <div class="detail-row">
+            <span class="detail-label">Food Type</span>
+            <span class="detail-value">{{ request.donation.food_type }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Quantity</span>
+            <span class="detail-value">{{ request.donation.quantity }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Donor</span>
+            <span class="detail-value">{{ request.donation.donor.username }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Volunteer</span>
+            <span class="detail-value">{{ request.volunteer.username if request.volunteer else 'Self-pickup' }}</span>
+        </div>
+    </div>
+
+    <!-- Rating Form -->
+    <form method="POST" action="{{ url_for('confirm_delivery', request_id=request.id) }}" enctype="multipart/form-data">
+        <div class="rating-section">
+            <h3><i class="fas fa-star"></i> Rate the Donor</h3>
+            <div class="star-rating">
+                <input type="radio" id="star5" name="donor_rating" value="5" checked>
+                <label for="star5" title="Excellent"><i class="fas fa-star"></i></label>
+                
+                <input type="radio" id="star4" name="donor_rating" value="4">
+                <label for="star4" title="Good"><i class="fas fa-star"></i></label>
+                
+                <input type="radio" id="star3" name="donor_rating" value="3">
+                <label for="star3" title="Average"><i class="fas fa-star"></i></label>
+                
+                <input type="radio" id="star2" name="donor_rating" value="2">
+                <label for="star2" title="Poor"><i class="fas fa-star"></i></label>
+                
+                <input type="radio" id="star1" name="donor_rating" value="1">
+                <label for="star1" title="Very Poor"><i class="fas fa-star"></i></label>
+            </div>
+            
+            <div class="form-group">
+                <label>Feedback (optional)</label>
+                <textarea name="feedback" class="form-control" rows="3" placeholder="Share your experience with this donation..."></textarea>
+            </div>
+        </div>
+
+        <!-- Photo Upload -->
+        <div class="upload-section">
+            <h3><i class="fas fa-camera"></i> Upload Delivery Photo</h3>
+            <div class="upload-area" onclick="document.getElementById('delivery_photo').click()">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Click to upload a photo of the received food</p>
+                <input type="file" id="delivery_photo" name="delivery_photo" accept="image/*" style="display: none;" onchange="previewImage(this)">
+            </div>
+            <div class="preview-image" id="previewContainer">
+                <img id="previewImg" src="" alt="Preview">
+            </div>
+        </div>
+
+        <button type="submit" class="submit-btn">
+            <i class="fas fa-check"></i> Confirm Delivery
+        </button>
+    </form>
+
+    <!-- Back Button -->
+    <div style="margin-top: 1.5rem; text-align: center;">
+        <a href="{{ url_for('ngo_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<script>
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('previewImg').src = e.target.result;
+                document.getElementById('previewContainer').style.display = 'block';
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+{% endblock %}
+

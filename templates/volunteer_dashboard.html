@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block page_title %}Volunteer Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    .welcome-banner {
+        background: linear-gradient(135deg, #00ACC1 0%, #00838f 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        color: white;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .welcome-banner h2 {
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .welcome-banner p {
+        opacity: 0.9;
+    }
+
+    .quick-stats {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .quick-stat {
+        text-align: center;
+    }
+
+    .quick-stat h3 {
+        font-size: 2rem;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .quick-stat p {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .section-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title h2 {
+        font-size: 1.5rem;
+        color: var(--text-primary);
+    }
+
+    .delivery-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow);
+        transition: all 0.3s;
+    }
+
+    .delivery-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .delivery-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .delivery-header h3 {
+        font-size: 1.1rem;
+        color: var(--text-primary);
+    }
+
+    .delivery-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .delivery-meta span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .location-info {
+        padding: 0.75rem;
+        background: #f5f5f5;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+
+    .location-info h4 {
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .location-info p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .status-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-pending {
+        background: #fff8e1;
+        color: #f57f17;
+    }
+
+    .status-accepted {
+        background: #e3f2fd;
+        color: #1565c0;
+    }
+
+    .status-completed {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .notification-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .notification-item:last-child {
+        border-bottom: none;
+    }
+
+    .notification-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e0f7fa;
+        color: #00ACC1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .notification-content p {
+        font-size: 0.9rem;
+    }
+
+    .notification-content small {
+        color: var(--text-secondary);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: #ddd;
+        margin-bottom: 1rem;
+    }
+
+    @media (max-width: 1024px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .welcome-banner {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+    }
+</style>
+
+<div class="welcome-banner">
+    <div>
+        <h2><i class="fas fa-truck"></i> Welcome, {{ current_user.username }}!</h2>
+        <p>Your help makes a difference in delivering food to those in need.</p>
+    </div>
+    <div class="quick-stats">
+        <div class="quick-stat">
+            <h3>{{ assigned_requests|length }}</h3>
+            <p>Assigned Deliveries</p>
+        </div>
+        <div class="quick-stat">
+            <h3>{{ assigned_requests|selectattr('status', 'equalto', 'completed')|list|length }}</h3>
+            <p>Completed</p>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div>
+        <div class="section-title">
+            <h2><i class="fas fa-truck"></i> My Assigned Deliveries</h2>
+        </div>
+
+        {% if assigned_requests %}
+            {% for req in assigned_requests %}
+            <div class="delivery-card">
+                <div class="delivery-header">
+                    <h3>{{ req.donation.food_type }}</h3>
+                    <span class="status-badge status-{{ req.status }}">{{ req.status }}</span>
+                </div>
+                <div class="delivery-meta">
+                    <span><i class="fas fa-building"></i> NGO: {{ req.ngo_user.username }}</span>
+                    <span><i class="fas fa-calendar"></i> {{ req.requested_at.strftime('%Y-%m-%d') }}</span>
+                </div>
+                <div class="location-info">
+                    <h4><i class="fas fa-map-marker-alt"></i> Pickup Location</h4>
+                    <p>{{ req.donation.pickup_location }}</p>
+                    <p><strong>Time:</strong> {{ req.donation.pickup_time }}</p>
+                </div>
+                <div class="location-info">
+                    <h4><i class="fas fa-home"></i> Delivery Location</h4>
+                    <p>{{ req.ngo_user.address or 'To be confirmed' }}</p>
+                </div>
+                
+                {% if req.status == 'accepted' %}
+                <a href="{{ url_for('volunteer_complete', request_id=req.id) }}" class="btn btn-success" style="width: 100%;">
+                    <i class="fas fa-check-circle"></i> Mark as Completed
+                </a>
+                {% elif req.status == 'completed' %}
+                <div style="text-align: center; color: var(--success); padding: 1rem;">
+                    <i class="fas fa-check-double"></i> Delivery Completed
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-truck"></i>
+            <h3>No assigned deliveries</h3>
+            <p>Accept delivery assignments from the available requests.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div>
+        <div class="section-title">
+            <h2><i class="fas fa-box-open"></i> Available for Pickup</h2>
+        </div>
+
+        {% if available_requests %}
+            {% for req in available_requests %}
+            <div class="delivery-card">
+                <div class="delivery-header">
+                    <h3>{{ req.donation.food_type }}</h3>
+                    <span class="badge badge-info">{{ req.donation.quantity }}</span>
+                </div>
+                <div class="delivery-meta">
+                    <span><i class="fas fa-user"></i> Donor: {{ req.donation.donor.username }}</span>
+                    <span><i class="fas fa-building"></i> NGO: {{ req.ngo_user.username }}</span>
+                </div>
+                <div class="location-info">
+                    <h4><i class="fas fa-map-marker-alt"></i> Pickup Location</h4>
+                    <p>{{ req.donation.pickup_location }}</p>
+                </div>
+                <a href="{{ url_for('volunteer_accept', request_id=req.id) }}" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-hand-paper"></i> Accept This Delivery
+                </a>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-box-open"></i>
+            <h3>No available deliveries</h3>
+            <p>Check back later for new delivery opportunities.</p>
+        </div>
+        {% endif %}
+
+        <div class="section-title" style="margin-top: 2rem;">
+            <h2><i class="fas fa-bell"></i> Recent Notifications</h2>
+        </div>
+
+        <div class="card">
+            {% if notifications %}
+                {% for notification in notifications %}
+                <div class="notification-item">
+                    <div class="notification-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="notification-content">
+                        <p>{{ notification.message }}</p>
+                        <small>{{ notification.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <p style="text-align: center; color: var(--text-secondary); padding: 2rem;">No new notifications</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

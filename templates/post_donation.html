@@ -1,0 +1,698 @@
+
+{% extends "base.html" %}
+
+{% block page_title %}Post Donation{% endblock %}
+
+{% block content %}
+<style>
+    .form-container {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: var(--shadow);
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .form-header h2 {
+        font-size: 1.75rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-header p {
+        color: var(--text-secondary);
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .form-group label span {
+        color: var(--error);
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: all 0.3s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+    }
+
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .food-type-options {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+    }
+
+    .food-option {
+        position: relative;
+    }
+
+    .food-option input {
+        position: absolute;
+        opacity: 0;
+    }
+
+    .food-option label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem;
+        background: #f5f5f5;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .food-option label:hover {
+        border-color: var(--primary);
+    }
+
+    .food-option input:checked + label {
+        background: #e8f5e9;
+        border-color: var(--primary);
+        color: var(--primary);
+    }
+
+    .food-option label i {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .btn-submit {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(46, 125, 50, 0.3);
+    }
+
+    .info-box {
+        background: #e3f2fd;
+        border-left: 4px solid var(--accent);
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-box h4 {
+        color: #1565c0;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-box p {
+        color: #1565c0;
+        font-size: 0.9rem;
+    }
+
+    /* Camera Capture Styles */
+    .camera-section {
+        background: #f8f9fa;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .camera-section h4 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .camera-preview {
+        position: relative;
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #000;
+    }
+
+    #videoElement {
+        width: 100%;
+        display: block;
+        border-radius: 12px;
+    }
+
+    #canvasElement {
+        display: none;
+    }
+
+    .camera-controls {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-top: 1rem;
+    }
+
+    .camera-btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 25px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .camera-btn.primary {
+        background: var(--primary);
+        color: white;
+    }
+
+    .camera-btn.primary:hover {
+        background: var(--primary-dark);
+    }
+
+    .camera-btn.secondary {
+        background: var(--secondary);
+        color: white;
+    }
+
+    .camera-btn.secondary:hover {
+        background: #e65100;
+    }
+
+    .camera-btn.danger {
+        background: var(--error);
+        color: white;
+    }
+
+    .camera-btn.danger:hover {
+        background: #d32f2f;
+    }
+
+    .detection-result {
+        margin-top: 1rem;
+        padding: 1rem;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .detection-result.success {
+        background: #e8f5e9;
+        border: 2px solid var(--success);
+    }
+
+    .detection-result.loading {
+        background: #fff8e1;
+        border: 2px solid var(--warning);
+    }
+
+    .detection-result .food-type-detected {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    .detection-result .confidence {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+
+    .captured-image {
+        width: 100%;
+        max-width: 300px;
+        border-radius: 12px;
+        margin-top: 1rem;
+        display: none;
+    }
+
+    .captured-image.show {
+        display: block;
+        margin: 1rem auto;
+    }
+
+    @media (max-width: 600px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .food-type-options {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .camera-controls {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div class="form-container">
+    <div class="form-card fade-in">
+        <div class="form-header">
+            <h2><i class="fas fa-utensils"></i> Post Food Donation</h2>
+            <p>Share your surplus food with those who need it</p>
+        </div>
+
+        <div class="info-box">
+            <h4><i class="fas fa-info-circle"></i> Tips for a great donation</h4>
+            <p>Be specific about food items, include expiry dates, and provide clear pickup instructions.</p>
+        </div>
+
+        <!-- AI Food Detection Section -->
+        <div class="camera-section">
+            <h4><i class="fas fa-camera"></i> AI Food Detection (Optional)</h4>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">Use your camera to automatically detect the food type</p>
+            
+            <div class="camera-preview">
+                <video id="videoElement" autoplay playsinline></video>
+                <canvas id="canvasElement"></canvas>
+            </div>
+            <img id="capturedImage" class="captured-image" alt="Captured food">
+            
+            <div class="camera-controls">
+                <button type="button" class="camera-btn primary" id="startCamera" onclick="startCamera()">
+                    <i class="fas fa-video"></i> Start Camera
+                </button>
+                <button type="button" class="camera-btn secondary" id="captureBtn" onclick="captureAndDetect()" disabled>
+                    <i class="fas fa-camera"></i> Capture & Detect
+                </button>
+                <button type="button" class="camera-btn danger" id="stopCamera" onclick="stopCamera()" style="display: none;">
+                    <i class="fas fa-stop"></i> Stop Camera
+                </button>
+            </div>
+            
+            <div id="detectionResult" class="detection-result" style="display: none;"></div>
+        </div>
+
+        <form method="POST" action="{{ url_for('post_donation') }}">
+            <div class="form-group">
+                <label>Food Type <span>*</span></label>
+                <div class="food-type-options">
+                    <div class="food-option">
+                        <input type="radio" id="cooked" name="food_type" value="Cooked Food" checked>
+                        <label for="cooked">
+                            <i class="fas fa-utensils"></i>
+                            <span>Cooked Food</span>
+                        </label>
+                    </div>
+                    <div class="food-option">
+                        <input type="radio" id="raw" name="food_type" value="Raw Vegetables">
+                        <label for="raw">
+                            <i class="fas fa-carrot"></i>
+                            <span>Raw Veggies</span>
+                        </label>
+                    </div>
+                    <div class="food-option">
+                        <input type="radio" id="bakery" name="food_type" value="Bakery Items">
+                        <label for="bakery">
+                            <i class="fas fa-bread-slice"></i>
+                            <span>Bakery</span>
+                        </label>
+                    </div>
+                    <div class="food-option">
+                        <input type="radio" id="fruits" name="food_type" value="Fruits">
+                        <label for="fruits">
+                            <i class="fas fa-apple-alt"></i>
+                            <span>Fruits</span>
+                        </label>
+                    </div>
+                    <div class="food-option">
+                        <input type="radio" id="packed" name="food_type" value="Packed Food">
+                        <label for="packed">
+                            <i class="fas fa-box"></i>
+                            <span>Packed Food</span>
+                        </label>
+                    </div>
+                    <div class="food-option">
+                        <input type="radio" id="other" name="food_type" value="Other">
+                        <label for="other">
+                            <i class="fas fa-ellipsis-h"></i>
+                            <span>Other</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description <span>*</span></label>
+                <textarea id="description" name="description" class="form-control" placeholder="Describe the food items, packaging, and any special handling instructions..." required></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="quantity">Quantity <span>*</span></label>
+                    <input type="text" id="quantity" name="quantity" class="form-control" placeholder="e.g., 5 kg, 20 packets, 10 meals" required>
+                </div>
+                <div class="form-group">
+                    <label for="expiry_date">Expiry Date <span>*</span></label>
+                    <input type="date" id="expiry_date" name="expiry_date" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="pickup_location">Pickup Location <span>*</span></label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="text" id="pickup_location" name="pickup_location" class="form-control" placeholder="Full address for pickup" required>
+                    <button type="button" class="btn btn-secondary" onclick="getLocation()" style="padding: 0.75rem 1rem; white-space: nowrap;">
+                        <i class="fas fa-location-arrow"></i> Use My Location
+                    </button>
+                </div>
+                <p id="location-status" style="font-size: 0.85rem; margin-top: 0.5rem; color: var(--text-secondary);"></p>
+            </div>
+
+            <div class="form-group">
+                <label for="pickup_time">Preferred Pickup Time <span>*</span></label>
+                <input type="text" id="pickup_time" name="pickup_time" class="form-control" placeholder="e.g., Today 2-4 PM, Tomorrow morning" required>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-paper-plane"></i> Post Donation
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Set minimum date to today
+    const dateInput = document.getElementById('expiry_date');
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.setAttribute('min', today);
+    
+    // Get user's current location
+    function getLocation() {
+        const statusElement = document.getElementById('location-status');
+        const locationInput = document.getElementById('pickup_location');
+        
+        if (navigator.geolocation) {
+            statusElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting your location...';
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    // Use reverse geocoding to get address
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            let address = '';
+                            if (data.address.road) address += data.address.road;
+                            if (data.address.suburb) address += ', ' + data.address.suburb;
+                            if (data.address.city) address += ', ' + data.address.city;
+                            if (data.address.state) address += ', ' + data.address.state;
+                            if (data.address.postcode) address += ' ' + data.address.postcode;
+                            
+                            locationInput.value = address || `${lat}, ${lng}`;
+                            statusElement.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success);"></i> Location found!';
+                        })
+                        .catch(() => {
+                            locationInput.value = `${lat}, ${lng}`;
+                            statusElement.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success);"></i> Coordinates added!';
+                        });
+                },
+                function(error) {
+                    statusElement.innerHTML = '<i class="fas fa-exclamation-circle" style="color: var(--error);"></i> Unable to get location. Please enter manually.';
+                }
+            );
+        } else {
+            statusElement.innerHTML = '<i class="fas fa-exclamation-circle" style="color: var(--error);"></i> Geolocation is not supported by your browser.';
+        }
+    }
+</script>
+
+<!-- TensorFlow.js and MobileNet for Food Detection -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.21.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.0/dist/mobilenet.min.js"></script>
+<script>
+    let videoStream = null;
+    let model = null;
+    let isModelLoaded = false;
+
+    // Food type mapping based on ImageNet classes
+    const foodTypeMapping = {
+        'pizza': 'Packed Food',
+        'burger': 'Packed Food',
+        'hotdog': 'Packed Food',
+        'burrito': 'Packed Food',
+        'cup': 'Packed Food',
+        'coffee': 'Packed Food',
+        'espresso': 'Packed Food',
+        'chocolate cake': 'Bakery Items',
+        'cheesecake': 'Bakery Items',
+        'ice cream': 'Packed Food',
+        'custard': 'Packed Food',
+        'yogurt': 'Packed Food',
+        'popcorn': 'Packed Food',
+        'bread': 'Bakery Items',
+        'bagel': 'Bakery Items',
+        'pretzel': 'Bakery Items',
+        'cheese': 'Cooked Food',
+        'omelet': 'Cooked Food',
+        'plate': 'Cooked Food',
+        'bowl': 'Cooked Food',
+        'soup': 'Cooked Food',
+        'stew': 'Cooked Food',
+        'pasta': 'Cooked Food',
+        'spaghetti': 'Cooked Food',
+        'poultry': 'Cooked Food',
+        'meat loaf': 'Cooked Food',
+        'potpie': 'Cooked Food',
+        'apple': 'Fruits',
+        'orange': 'Fruits',
+        'lemon': 'Fruits',
+        'banana': 'Fruits',
+        'pineapple': 'Fruits',
+        'fig': 'Fruits',
+        'pomegranate': 'Fruits',
+        'strawberry': 'Fruits',
+        'raspberry': 'Fruits',
+        'broccoli': 'Raw Vegetables',
+        'cauliflower': 'Raw Vegetables',
+        'cucumber': 'Raw Vegetables',
+        'zucchini': 'Raw Vegetables',
+        'bell pepper': 'Raw Vegetables',
+        'carrot': 'Raw Vegetables',
+        'cabbage': 'Raw Vegetables',
+        'lettuce': 'Raw Vegetables',
+        'mushroom': 'Raw Vegetables',
+        'head cabbage': 'Raw Vegetables',
+        'pickle': 'Raw Vegetables'
+    };
+
+    const defaultFoodTypes = ['Cooked Food', 'Raw Vegetables', 'Bakery Items', 'Fruits', 'Packed Food', 'Other'];
+
+    // Initialize TensorFlow.js model
+    async function loadModel() {
+        try {
+            model = await mobilenet.load();
+            isModelLoaded = true;
+            console.log('MobileNet model loaded successfully');
+        } catch (error) {
+            console.error('Error loading model:', error);
+            isModelLoaded = false;
+        }
+    }
+
+    // Load model on page load
+    loadModel();
+
+    // Start camera
+    async function startCamera() {
+        try {
+            videoStream = await navigator.mediaDevices.getUserMedia({ 
+                video: { 
+                    facingMode: 'environment',
+                    width: { ideal: 640 },
+                    height: { ideal: 480 }
+                } 
+            });
+            
+            const video = document.getElementById('videoElement');
+            video.srcObject = videoStream;
+            
+            document.getElementById('startCamera').style.display = 'none';
+            document.getElementById('captureBtn').disabled = false;
+            document.getElementById('stopCamera').style.display = 'inline-flex';
+            document.getElementById('videoElement').style.display = 'block';
+            document.getElementById('capturedImage').classList.remove('show');
+            
+        } catch (error) {
+            console.error('Error accessing camera:', error);
+            alert('Unable to access camera. Please ensure you have granted camera permissions.');
+        }
+    }
+
+    // Stop camera
+    function stopCamera() {
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+            videoStream = null;
+        }
+        
+        document.getElementById('startCamera').style.display = 'inline-flex';
+        document.getElementById('captureBtn').disabled = true;
+        document.getElementById('stopCamera').style.display = 'none';
+        document.getElementById('videoElement').style.display = 'none';
+    }
+
+    // Capture and detect food
+    async function captureAndDetect() {
+        const video = document.getElementById('videoElement');
+        const canvas = document.getElementById('canvasElement');
+        const capturedImage = document.getElementById('capturedImage');
+        const detectionResult = document.getElementById('detectionResult');
+        
+        // Set canvas dimensions to match video
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // Draw video frame to canvas
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0);
+        
+        // Show captured image
+        capturedImage.src = canvas.toDataURL('image/jpeg');
+        capturedImage.classList.add('show');
+        
+        // Stop camera after capture
+        stopCamera();
+        
+        // Show loading state
+        detectionResult.style.display = 'block';
+        detectionResult.className = 'detection-result loading';
+        detectionResult.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing food...';
+        
+        // Check if model is loaded
+        if (!isModelLoaded || !model) {
+            detectionResult.className = 'detection-result';
+            detectionResult.innerHTML = '<i class="fas fa-exclamation-circle"></i> AI model is still loading. Please try again in a few seconds.';
+            return;
+        }
+        
+        try {
+            // Classify the image
+            const predictions = await model.classify(canvas);
+            console.log('Predictions:', predictions);
+            
+            // Find the best food match
+            let detectedFoodType = null;
+            let highestConfidence = 0;
+            
+            for (const pred of predictions) {
+                const className = pred.className.toLowerCase();
+                const confidence = pred.probability;
+                
+                // Check if any keyword matches
+                for (const [keyword, foodType] of Object.entries(foodTypeMapping)) {
+                    if (className.includes(keyword)) {
+                        if (confidence > highestConfidence) {
+                            highestConfidence = confidence;
+                            detectedFoodType = foodType;
+                        }
+                    }
+                }
+            }
+            
+            if (detectedFoodType) {
+                // Update detection result
+                const confidencePercent = (highestConfidence * 100).toFixed(1);
+                detectionResult.className = 'detection-result success';
+                detectionResult.innerHTML = `
+                    <div class="food-type-detected">
+                        <i class="fas fa-check-circle"></i> Detected: ${detectedFoodType}
+                    </div>
+                    <div class="confidence">Confidence: ${confidencePercent}%</div>
+                    <p style="margin-top: 0.5rem; font-size: 0.85rem;">
+                        <a href="#" onclick="selectFoodType('${detectedFoodType}'); return false;" style="color: var(--primary);">
+                            Click to select this food type
+                        </a>
+                    </p>
+                `;
+            } else {
+                detectionResult.className = 'detection-result';
+                detectionResult.innerHTML = `
+                    <i class="fas fa-question-circle"></i> Could not detect specific food type.<br>
+                    <small>Please select manually from the options below.</small>
+                `;
+            }
+            
+        } catch (error) {
+            console.error('Error during detection:', error);
+            detectionResult.className = 'detection-result';
+            detectionResult.innerHTML = '<i class="fas fa-exclamation-circle"></i> Error analyzing image. Please try again.';
+        }
+    }
+
+    // Select food type based on detection
+    function selectFoodType(foodType) {
+        // Map detected type to radio button value
+        const radioMap = {
+            'Cooked Food': 'cooked',
+            'Raw Vegetables': 'raw',
+            'Bakery Items': 'bakery',
+            'Fruits': 'fruits',
+            'Packed Food': 'packed',
+            'Other': 'other'
+        };
+        
+        const radioId = radioMap[foodType];
+        if (radioId) {
+            const radio = document.getElementById(radioId);
+            if (radio) {
+                radio.checked = true;
+                
+                // Visual feedback
+                const detectionResult = document.getElementById('detectionResult');
+                detectionResult.innerHTML += '<p style="color: var(--success); margin-top: 0.5rem;"><i class="fas fa-check"></i> Food type selected!</p>';
+            }
+        }
+    }
+</script>
+{% endblock %}
+

@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block page_title %}Notifications{% endblock %}
+
+{% block content %}
+<style>
+    .notification-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s;
+    }
+
+    .notification-card.unread {
+        border-left: 4px solid var(--primary);
+    }
+
+    .notification-card:hover {
+        transform: translateX(5px);
+    }
+
+    .notification-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+
+    .notification-icon.donation {
+        background: #e8f5e9;
+        color: var(--primary);
+    }
+
+    .notification-icon.request {
+        background: #fff8e1;
+        color: #f57f17;
+    }
+
+    .notification-icon.rating {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+
+    .notification-icon.delivery {
+        background: #e0f7fa;
+        color: #00ACC1;
+    }
+
+    .notification-content {
+        flex: 1;
+    }
+
+    .notification-content p {
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .notification-content small {
+        color: var(--text-secondary);
+    }
+
+    .notification-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #ddd;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        margin-bottom: 0.5rem;
+        color: var(--text-primary);
+    }
+</style>
+
+<h2 style="margin-bottom: 2rem;"><i class="fas fa-bell"></i> All Notifications</h2>
+
+{% if notifications %}
+    {% for notification in notifications %}
+    <div class="notification-card {% if not notification.is_read %}unread{% endif %}">
+        <div class="notification-icon {% if 'donation' in notification.message.lower() %}donation{% elif 'request' in notification.message.lower() %}request{% elif 'rating' in notification.message.lower() or 'feedback' in notification.message.lower() %}rating{% else %}delivery{% endif %}">
+            <i class="fas fa-{% if 'donation' in notification.message.lower() %}utensils{% elif 'request' in notification.message.lower() %}hand-paper{% elif 'rating' in notification.message.lower() or 'feedback' in notification.message.lower() %}star{% elif 'accepted' in notification.message.lower() or 'assigned' in notification.message.lower() %}truck{% else %}bell{% endif %}"></i>
+        </div>
+        <div class="notification-content">
+            <p>{{ notification.message }}</p>
+            <small>{{ notification.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+        </div>
+        <div class="notification-actions">
+            {% if not notification.is_read %}
+            <a href="{{ url_for('mark_read', id=notification.id) }}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                <i class="fas fa-check"></i> Mark Read
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+<div class="empty-state">
+    <i class="fas fa-bell-slash"></i>
+    <h3>No notifications</h3>
+    <p>You're all caught up! Check back later for updates.</p>
+</div>
+{% endif %}
+{% endblock %}
+

@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block title %}Register - FoodShare{% endblock %}
+
+{% block landing_content %}
+<style>
+    .auth-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, #1A1A2E 0%, #16213e 50%, #0f3460 100%);
+        position: relative;
+    }
+
+    .auth-page::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .auth-container {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        width: 100%;
+        max-width: 500px;
+        padding: 2.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .auth-header .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2E7D32;
+        margin-bottom: 1rem;
+    }
+
+    .auth-header h1 {
+        font-size: 1.75rem;
+        color: #212121;
+        margin-bottom: 0.5rem;
+    }
+
+    .auth-header p {
+        color: #757575;
+    }
+
+    .role-selector {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .role-option {
+        position: relative;
+    }
+
+    .role-option input {
+        position: absolute;
+        opacity: 0;
+    }
+
+    .role-option label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem 0.5rem;
+        background: #f5f5f5;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .role-option label:hover {
+        border-color: #2E7D32;
+    }
+
+    .role-option input:checked + label {
+        background: #e8f5e9;
+        border-color: #2E7D32;
+        color: #2E7D32;
+    }
+
+    .role-option label i {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .role-option label span {
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #424242;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 1rem;
+        transition: all 0.3s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #2E7D32;
+        box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+    }
+
+    .btn-auth {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-auth:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(46, 125, 50, 0.3);
+    }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #757575;
+    }
+
+    .auth-footer a {
+        color: #2E7D32;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .auth-footer a:hover {
+        text-decoration: underline;
+    }
+
+    .terms {
+        font-size: 0.85rem;
+        color: #757575;
+        text-align: center;
+        margin-top: 1rem;
+    }
+
+    .terms a {
+        color: #2E7D32;
+    }
+
+    @media (max-width: 500px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .role-selector {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+
+<div class="auth-page">
+    <div class="auth-container fade-in">
+        <div class="auth-header">
+            <div class="brand">
+                <i class="fas fa-utensils"></i>
+                <span>FoodShare</span>
+            </div>
+            <h1>Join FoodShare</h1>
+            <p>Create an account to start sharing or receiving food</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('register') }}">
+            <div class="form-group">
+                <label>I want to register as</label>
+                <div class="role-selector">
+                    <div class="role-option">
+                        <input type="radio" id="donor" name="role" value="donor" checked>
+                        <label for="donor">
+                            <i class="fas fa-hand-holding-heart"></i>
+                            <span>Donor</span>
+                        </label>
+                    </div>
+                    <div class="role-option">
+                        <input type="radio" id="ngo" name="role" value="ngo">
+                        <label for="ngo">
+                            <i class="fas fa-building"></i>
+                            <span>NGO</span>
+                        </label>
+                    </div>
+                    <div class="role-option">
+                        <input type="radio" id="volunteer" name="role" value="volunteer">
+                        <label for="volunteer">
+                            <i class="fas fa-truck"></i>
+                            <span>Volunteer</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" class="form-control" placeholder="Choose a username" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="your@email.com" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="Create a password" required>
+                </div>
+                <div class="form-group">
+                    <label for="contact_no">Phone Number</label>
+                    <input type="tel" id="contact_no" name="contact_no" class="form-control" placeholder="Your phone number">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="organization_name">Organization Name <span style="color: #757575; font-weight: 400;">(for NGOs)</span></label>
+                <input type="text" id="organization_name" name="organization_name" class="form-control" placeholder="Your organization name">
+            </div>
+
+            <div class="form-group">
+                <label for="address">Address</label>
+                <input type="text" id="address" name="address" class="form-control" placeholder="Your address">
+            </div>
+
+            <button type="submit" class="btn-auth">
+                <i class="fas fa-user-plus"></i> Create Account
+            </button>
+
+            <p class="terms">By registering, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></p>
+        </form>
+
+        <div class="auth-footer">
+            Already have an account? <a href="{{ url_for('login') }}">Sign in</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

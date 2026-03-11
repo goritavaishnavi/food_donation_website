@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Error - FoodShare{% endblock %}
+
+{% block landing_content %}
+<style>
+    .error-page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, #1A1A2E 0%, #16213e 100%);
+    }
+
+    .error-container {
+        text-align: center;
+        color: white;
+    }
+
+    .error-code {
+        font-size: 8rem;
+        font-weight: 700;
+        color: #FF6F00;
+        line-height: 1;
+        margin-bottom: 1rem;
+    }
+
+    .error-container h1 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .error-container p {
+        color: rgba(255,255,255,0.7);
+        margin-bottom: 2rem;
+    }
+
+    .btn-home {
+        display: inline-block;
+        padding: 1rem 2rem;
+        background: #FF6F00;
+        color: white;
+        text-decoration: none;
+        border-radius: 30px;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+
+    .btn-home:hover {
+        background: #e65100;
+        transform: translateY(-3px);
+    }
+</style>
+
+<div class="error-page">
+    <div class="error-container">
+        <div class="error-code">{{ error_code or '404' }}</div>
+        <h1>{{ error or 'Page Not Found' }}</h1>
+        <p>The page you're looking for doesn't exist or has been moved.</p>
+        <a href="{{ url_for('index') }}" class="btn-home">
+            <i class="fas fa-home"></i> Go Home
+        </a>
+    </div>
+</div>
+{% endblock %}
+

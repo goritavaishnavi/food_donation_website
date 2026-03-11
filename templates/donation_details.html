@@ -1,0 +1,277 @@
+
+{% extends "base.html" %}
+
+{% block page_title %}Donation Details{% endblock %}
+
+{% block content %}
+<style>
+    .detail-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .detail-header {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 2rem;
+    }
+
+    .detail-header h2 {
+        font-size: 1.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    .detail-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+    }
+
+    .detail-card h3 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .detail-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .detail-item:last-child {
+        border-bottom: none;
+    }
+
+    .detail-item strong {
+        color: var(--text-secondary);
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-available { background: #e8f5e9; color: #2e7d32; }
+    .status-requested { background: #fff8e1; color: #f57f17; }
+    .status-accepted { background: #e3f2fd; color: #1565c0; }
+    .status-completed { background: #f3e5f5; color: #7b1fa2; }
+
+    .request-list {
+        margin-top: 1rem;
+    }
+
+    .request-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: #f9f9f9;
+        border-radius: 10px;
+        margin-bottom: 0.75rem;
+    }
+
+    .request-info h4 {
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .request-info p {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+
+    .request-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .rating-list {
+        margin-top: 1rem;
+    }
+
+    .rating-item {
+        padding: 1rem;
+        background: #f9f9f9;
+        border-radius: 10px;
+        margin-bottom: 0.75rem;
+    }
+
+    .rating-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .rating-stars {
+        color: #ffd700;
+    }
+
+    .rating-feedback {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        font-style: italic;
+    }
+
+    .rating-photo {
+        margin-top: 0.75rem;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .rating-photo img {
+        width: 100%;
+        max-height: 200px;
+        object-fit: cover;
+    }
+
+    @media (max-width: 768px) {
+        .detail-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="detail-container">
+    <div class="detail-header">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <h2><i class="fas fa-utensils"></i> {{ donation.food_type }}</h2>
+                <p style="color: var(--text-secondary);">Posted by {{ donation.donor.username }} on {{ donation.created_at.strftime('%Y-%m-%d') }}</p>
+            </div>
+            <span class="status-badge status-{{ donation.status }}">{{ donation.status }}</span>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+        <div class="detail-card">
+            <h3><i class="fas fa-info-circle"></i> Donation Details</h3>
+            <div class="detail-item">
+                <strong>Food Type</strong>
+                <span>{{ donation.food_type }}</span>
+            </div>
+            <div class="detail-item">
+                <strong>Quantity</strong>
+                <span>{{ donation.quantity }}</span>
+            </div>
+            <div class="detail-item">
+                <strong>Expiry Date</strong>
+                <span>{{ donation.expiry_date.strftime('%Y-%m-%d') }}</span>
+            </div>
+            <div class="detail-item">
+                <strong>Pickup Location</strong>
+                <span>{{ donation.pickup_location }}</span>
+            </div>
+            <div class="detail-item">
+                <strong>Pickup Time</strong>
+                <span>{{ donation.pickup_time }}</span>
+            </div>
+            {% if donation.description %}
+            <div class="detail-item" style="flex-direction: column; align-items: flex-start; gap: 0.5rem;">
+                <strong>Description</strong>
+                <span>{{ donation.description }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="detail-card">
+            <h3><i class="fas fa-user"></i> Donor Information</h3>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                <img src="{{ url_for('static', filename='uploads/' + donation.donor.profile_image) }}" alt="" style="width: 60px; height: 60px; border-radius: 50%;">
+                <div>
+                    <h4>{{ donation.donor.username }}</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">{{ donation.donor.organization_name or 'Individual Donor' }}</p>
+                </div>
+            </div>
+            <div class="detail-item">
+                <strong>Contact</strong>
+                <span>{{ donation.donor.contact_no or 'Not provided' }}</span>
+            </div>
+            <div class="detail-item">
+                <strong>Email</strong>
+                <span>{{ donation.donor.email }}</span>
+            </div>
+            
+            {% if current_user.role == 'donor' and current_user.id == donation.donor_id %}
+            <div style="margin-top: 1rem;">
+                <h4 style="margin-bottom: 0.75rem;">Requests for this donation:</h4>
+                <div class="request-list">
+                    {% if requests %}
+                        {% for req in requests %}
+                        <div class="request-item">
+                            <div class="request-info">
+                                <h4>{{ req.ngo_user.username }}</h4>
+                                <p>{{ req.ngo_user.organization_name }}</p>
+                                <p>Status: <span class="status-badge status-{{ req.status }}" style="font-size: 0.7rem;">{{ req.status }}</span></p>
+                            </div>
+                            {% if req.status == 'pending' %}
+                            <div class="request-actions">
+                                <a href="{{ url_for('respond_request', id=req.id, action='accept') }}" class="btn btn-success" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                                    <i class="fas fa-check"></i> Accept
+                                </a>
+                                <a href="{{ url_for('respond_request', id=req.id, action='reject') }}" class="btn btn-danger" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                                    <i class="fas fa-times"></i> Reject
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                    <p style="color: var(--text-secondary);">No requests yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if ratings %}
+    <div class="detail-card" style="margin-top: 2rem;">
+        <h3><i class="fas fa-star"></i> Ratings & Feedback</h3>
+        <div class="rating-list">
+            {% for rating in ratings %}
+            <div class="rating-item">
+                <div class="rating-header">
+                    <h4>{{ rating.ngo_user.username }}</h4>
+                    <div class="rating-stars">
+                        {% for i in range(5) %}
+                            {% if i < rating.rating %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% if rating.feedback %}
+                <p class="rating-feedback">"{{ rating.feedback }}"</p>
+                {% endif %}
+                {% if rating.photos %}
+                <div class="rating-photo">
+                    <img src="{{ url_for('static', filename='uploads/' + rating.photos) }}" alt="Feedback photo">
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+
+{% block page_title %}Track Donation{% endblock %}
+
+{% block content %}
+<style>
+    .tracking-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .tracking-header {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        color: white;
+        margin-bottom: 2rem;
+    }
+
+    .tracking-header h2 {
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .tracking-timeline {
+        position: relative;
+        padding: 2rem 0;
+    }
+
+    .timeline-line {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: #e0e0e0;
+        transform: translateY(-50%);
+        z-index: 0;
+    }
+
+    .timeline-progress {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        height: 4px;
+        background: var(--success);
+        transform: translateY(-50%);
+        z-index: 1;
+        transition: width 0.5s ease;
+    }
+
+    .timeline-steps {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        z-index: 2;
+    }
+
+    .timeline-step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        width: 120px;
+    }
+
+    .step-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: #e0e0e0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s;
+    }
+
+    .step-icon.completed {
+        background: var(--success);
+        color: white;
+    }
+
+    .step-icon.active {
+        background: var(--primary);
+        color: white;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0.4); }
+        70% { box-shadow: 0 0 0 10px rgba(46, 125, 50, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(46, 125, 50, 0); }
+    }
+
+    .step-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #757575;
+    }
+
+    .step-label.active {
+        color: var(--primary);
+    }
+
+    .step-label.completed {
+        color: var(--success);
+    }
+
+    .step-date {
+        font-size: 0.75rem;
+        color: #9e9e9e;
+        margin-top: 0.25rem;
+    }
+
+    .details-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 1.5rem;
+    }
+
+    .details-card h3 {
+        color: var(--primary);
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .detail-label {
+        font-weight: 500;
+        color: var(--text-secondary);
+    }
+
+    .detail-value {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    .update-form {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+    }
+
+    .update-form h3 {
+        color: var(--primary);
+        margin-bottom: 1rem;
+    }
+
+    .status-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .status-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid #e0e0e0;
+        border-radius: 25px;
+        background: white;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 0.9rem;
+    }
+
+    .status-btn:hover {
+        border-color: var(--primary);
+    }
+
+    .status-btn.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+
+    .tracking-notes {
+        background: #f5f5f5;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .tracking-notes h4 {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.5rem;
+    }
+
+    .note-item {
+        display: flex;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .note-item:last-child {
+        border-bottom: none;
+    }
+
+    .note-time {
+        font-size: 0.8rem;
+        color: #9e9e9e;
+        white-space: nowrap;
+    }
+
+    .note-text {
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 600px) {
+        .timeline-steps {
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .timeline-step {
+            width: 100%;
+            flex-direction: row;
+            gap: 1rem;
+            text-align: left;
+        }
+        
+        .timeline-line, .timeline-progress {
+            display: none;
+        }
+    }
+</style>
+
+<div class="tracking-container">
+    <div class="tracking-header">
+        <h2><i class="fas fa-map-marker-alt"></i> Food Delivery Tracking</h2>
+        <p>Track your food donation in real-time</p>
+    </div>
+
+    <!-- Timeline -->
+    <div class="details-card">
+        <div class="tracking-timeline">
+            <div class="timeline-line"></div>
+            <div class="timeline-progress" style="width: {% if request.tracking_status == 'pending' %}0%{% elif request.tracking_status == 'accepted' %}16%{% elif request.tracking_status == 'volunteer_assigned' %}33%{% elif request.tracking_status == 'picked_up' %}50%{% elif request.tracking_status == 'in_transit' %}66%{% elif request.tracking_status == 'delivered' %}83%{% else %}100%{% endif %}"></div>
+            
+            <div class="timeline-steps">
+                <div class="timeline-step">
+                    <div class="step-icon {% if request.tracking_status in ['accepted', 'volunteer_assigned', 'picked_up', 'in_transit', 'delivered', 'completed'] %}completed{% elif request.tracking_status == 'pending' %}active{% endif %}">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="step-label {% if request.tracking_status in ['accepted', 'volunteer_assigned', 'picked_up', 'in_transit', 'delivered', 'completed'] %}completed{% elif request.tracking_status == 'pending' %}active{% endif %}">Accepted</div>
+                    <div class="step-date">{{ request.requested_at.strftime('%Y-%m-%d %H:%M') if request.requested_at else '-' }}</div>
+                </div>
+                
+                <div class="timeline-step">
+                    <div class="step-icon {% if request.tracking_status in ['volunteer_assigned', 'picked_up', 'in_transit', 'delivered', 'completed'] %}completed{% elif request.tracking_status == 'accepted' %}active{% endif %}">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="step-label {% if request.tracking_status in ['volunteer_assigned', 'picked_up', 'in_transit', 'delivered', 'completed'] %}completed{% elif request.tracking_status == 'accepted' %}active{% endif %}">Volunteer Assigned</div>
+                    <div class="step-date">-</div>
+                </div>
+                
+                <div class="timeline-step">
+                    <div class="step-icon {% if request.tracking_status in ['picked_up', 'in_transit', 'delivered', 'completed'] %}completed{% elif request.tracking_status == 'volunteer_assigned' %}active{% endif %}">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="step-label {% if request.tracking_status in ['picked_up', 'in_transit', 'delivered', 'completed'] %}completed{% elif request.tracking_status == 'volunteer_assigned' %}active{% endif %}">Picked Up</div>
+                    <div class="step-date">{{ request.pickup_time.strftime('%Y-%m-%d %H:%M') if request.pickup_time else '-' }}</div>
+                </div>
+                
+                <div class="timeline-step">
+                    <div class="step-icon {% if request.tracking_status in ['in_transit', 'delivered', 'completed'] %}completed{% elif request.tracking_status == 'picked_up' %}active{% endif %}">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <div class="step-label {% if request.tracking_status in ['in_transit', 'delivered', 'completed'] %}completed{% elif request.tracking_status == 'picked_up' %}active{% endif %}">In Transit</div>
+                    <div class="step-date">-</div>
+                </div>
+                
+                <div class="timeline-step">
+                    <div class="step-icon {% if request.tracking_status in ['delivered', 'completed'] %}completed{% elif request.tracking_status == 'in_transit' %}active{% endif %}">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <div class="step-label {% if request.tracking_status in ['delivered', 'completed'] %}completed{% elif request.tracking_status == 'in_transit' %}active{% endif %}">Delivered</div>
+                    <div class="step-date">{{ request.delivery_time.strftime('%Y-%m-%d %H:%M') if request.delivery_time else '-' }}</div>
+                </div>
+                
+                <div class="timeline-step">
+                    <div class="step-icon {% if request.tracking_status == 'completed' %}completed{% elif request.tracking_status == 'delivered' %}active{% endif %}">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <div class="step-label {% if request.tracking_status == 'completed' %}completed{% elif request.tracking_status == 'delivered' %}active{% endif %}">Completed</div>
+                    <div class="step-date">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details -->
+    <div class="details-card">
+        <h3><i class="fas fa-info-circle"></i> Delivery Details</h3>
+        <div class="detail-row">
+            <span class="detail-label">Food Type</span>
+            <span class="detail-value">{{ request.donation.food_type }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Quantity</span>
+            <span class="detail-value">{{ request.donation.quantity }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Pickup Location</span>
+            <span class="detail-value">{{ request.donation.pickup_location }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Donor</span>
+            <span class="detail-value">{{ request.donation.donor.username }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">NGO</span>
+            <span class="detail-value">{{ request.ngo_user.organization_name or request.ngo_user.username }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Volunteer</span>
+            <span class="detail-value">{{ request.volunteer.username if request.volunteer else 'Not assigned' }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Current Status</span>
+            <span class="detail-value">
+                <span class="badge badge-{% if request.tracking_status == 'completed' %}success{% elif request.tracking_status in ['delivered', 'in_transit'] %}info{% elif request.tracking_status in ['picked_up', 'volunteer_assigned'] %}warning{% else %}error{% endif %}">
+                    {{ request.tracking_status|replace('_', ' ')|upper }}
+                </span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Tracking Notes -->
+    {% if request.tracking_notes %}
+    <div class="details-card">
+        <h3><i class="fas fa-sticky-note"></i> Tracking Notes</h3>
+        <div class="tracking-notes">
+            <p>{{ request.tracking_notes }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Update Form (for volunteers) -->
+    {% if current_user.role == 'volunteer' and request.volunteer_id == current_user.id and request.tracking_status != 'completed' %}
+    <div class="update-form">
+        <h3><i class="fas fa-edit"></i> Update Delivery Status</h3>
+        <form method="POST" action="{{ url_for('update_tracking', request_id=request.id) }}">
+            <div class="form-group">
+                <label>Select Status</label>
+                <div class="status-buttons">
+                    {% if request.tracking_status == 'accepted' %}
+                    <button type="submit" name="tracking_status" value="volunteer_assigned" class="status-btn {% if request.tracking_status == 'volunteer_assigned' %}active{% endif %}">
+                        <i class="fas fa-user"></i> Confirm Assignment
+                    </button>
+                    {% endif %}
+                    
+                    {% if request.tracking_status in ['accepted', 'volunteer_assigned'] %}
+                    <button type="submit" name="tracking_status" value="picked_up" class="status-btn {% if request.tracking_status == 'picked_up' %}active{% endif %}">
+                        <i class="fas fa-box"></i> Picked Up
+                    </button>
+                    {% endif %}
+                    
+                    {% if request.tracking_status == 'picked_up' %}
+                    <button type="submit" name="tracking_status" value="in_transit" class="status-btn {% if request.tracking_status == 'in_transit' %}active{% endif %}">
+                        <i class="fas fa-truck"></i> In Transit
+                    </button>
+                    {% endif %}
+                    
+                    {% if request.tracking_status in ['picked_up', 'in_transit'] %}
+                    <button type="submit" name="tracking_status" value="delivered" class="status-btn {% if request.tracking_status == 'delivered' %}active{% endif %}">
+                        <i class="fas fa-home"></i> Delivered
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Add Notes (optional)</label>
+                <textarea name="tracking_notes" class="form-control" rows="3" placeholder="Add any notes about the delivery...">{{ request.tracking_notes }}</textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Update Status
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Back Button -->
+    <div style="margin-top: 2rem;">
+        {% if current_user.role == 'donor' %}
+        <a href="{{ url_for('donor_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        {% elif current_user.role == 'ngo' %}
+        <a href="{{ url_for('ngo_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        {% elif current_user.role == 'volunteer' %}
+        <a href="{{ url_for('volunteer_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        {% else %}
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

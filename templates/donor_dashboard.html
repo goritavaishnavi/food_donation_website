@@ -1,0 +1,359 @@
+{% extends "base.html" %}
+
+{% block page_title %}Donor Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    .welcome-banner {
+        background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        color: white;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .welcome-banner h2 {
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .welcome-banner p {
+        opacity: 0.9;
+    }
+
+    .quick-stats {
+        display: flex;
+        gap: 2rem;
+    }
+
+    .quick-stat {
+        text-align: center;
+    }
+
+    .quick-stat h3 {
+        font-size: 2rem;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .quick-stat p {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .section-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title h2 {
+        font-size: 1.5rem;
+        color: var(--text-primary);
+    }
+
+    .donation-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s;
+    }
+
+    .donation-card:hover {
+        transform: translateX(5px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .donation-info h3 {
+        font-size: 1.1rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .donation-meta {
+        display: flex;
+        gap: 1.5rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .donation-meta span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .donation-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .status-badge {
+        padding: 0.35rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-available {
+        background: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    .status-requested {
+        background: #fff8e1;
+        color: #f57f17;
+    }
+
+    .status-accepted {
+        background: #e3f2fd;
+        color: #1565c0;
+    }
+
+    .status-completed {
+        background: #f3e5f5;
+        color: #7b1fa2;
+    }
+
+    .rating-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: var(--shadow);
+    }
+
+    .rating-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .rating-header h4 {
+        color: var(--text-primary);
+    }
+
+    .rating-stars {
+        color: #ffd700;
+    }
+
+    .rating-feedback {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-style: italic;
+    }
+
+    .rating-photo {
+        margin-top: 1rem;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .rating-photo img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+    }
+
+    .empty-donations {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-donations i {
+        font-size: 3rem;
+        color: #ddd;
+        margin-bottom: 1rem;
+    }
+
+    .notification-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background 0.3s;
+    }
+
+    .notification-item:hover {
+        background: #fafafa;
+    }
+
+    .notification-item:last-child {
+        border-bottom: none;
+    }
+
+    .notification-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e8f5e9;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .notification-content {
+        flex: 1;
+    }
+
+    .notification-content p {
+        font-size: 0.9rem;
+        color: var(--text-primary);
+    }
+
+    .notification-content small {
+        color: var(--text-secondary);
+    }
+
+    @media (max-width: 1024px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .welcome-banner {
+            flex-direction: column;
+            text-align: center;
+            gap: 1rem;
+        }
+    }
+</style>
+
+<div class="welcome-banner">
+    <div>
+        <h2><i class="fas fa-hand-holding-heart"></i> Welcome, {{ current_user.username }}!</h2>
+        <p>Your generosity is making a difference. Thank you for sharing food with those in need.</p>
+    </div>
+    <div class="quick-stats">
+        <div class="quick-stat">
+            <h3>{{ donations|length }}</h3>
+            <p>Total Donations</p>
+        </div>
+        <div class="quick-stat">
+            <h3>{{ avg_rating }}</h3>
+            <p>Average Rating</p>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div>
+        <div class="section-title">
+            <h2><i class="fas fa-utensils"></i> My Donations</h2>
+            <a href="{{ url_for('post_donation') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Post New
+            </a>
+        </div>
+
+        {% if donations %}
+            {% for donation in donations[:5] %}
+            <div class="donation-card">
+                <div class="donation-info">
+                    <h3>{{ donation.food_type }}</h3>
+                    <div class="donation-meta">
+                        <span><i class="fas fa-box"></i> {{ donation.quantity }}</span>
+                        <span><i class="fas fa-map-marker-alt"></i> {{ donation.pickup_location[:30] }}...</span>
+                        <span><i class="fas fa-clock"></i> {{ donation.pickup_time }}</span>
+                    </div>
+                </div>
+                <div class="donation-actions">
+                    <span class="status-badge status-{{ donation.status }}">{{ donation.status }}</span>
+                    <a href="{{ url_for('donation_details', id=donation.id) }}" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="empty-donations">
+            <i class="fas fa-utensils"></i>
+            <h3>No donations yet</h3>
+            <p>Start sharing food by posting your first donation!</p>
+            <a href="{{ url_for('post_donation') }}" class="btn btn-primary" style="margin-top: 1rem;">
+                <i class="fas fa-plus"></i> Post Your First Donation
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div>
+        <div class="section-title">
+            <h2><i class="fas fa-star"></i> Recent Ratings</h2>
+        </div>
+
+        {% if ratings %}
+            {% for rating in ratings %}
+            <div class="rating-card">
+                <div class="rating-header">
+                    <h4>{{ rating.ngo_user.username }}</h4>
+                    <div class="rating-stars">
+                        {% for i in range(5) %}
+                            {% if i < rating.rating %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% if rating.feedback %}
+                <p class="rating-feedback">"{{ rating.feedback }}"</p>
+                {% endif %}
+                {% if rating.photos %}
+                <div class="rating-photo">
+                    <img src="{{ url_for('static', filename='uploads/' + rating.photos) }}" alt="Feedback photo">
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="empty-donations">
+            <i class="fas fa-star"></i>
+            <h3>No ratings yet</h3>
+            <p>After NGOs receive your donations, they'll be able to rate and give feedback.</p>
+        </div>
+        {% endif %}
+
+        <div class="section-title" style="margin-top: 2rem;">
+            <h2><i class="fas fa-bell"></i> Recent Notifications</h2>
+        </div>
+
+        <div class="card">
+            {% if notifications %}
+                {% for notification in notifications %}
+                <div class="notification-item">
+                    <div class="notification-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="notification-content">
+                        <p>{{ notification.message }}</p>
+                        <small>{{ notification.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <p style="text-align: center; color: var(--text-secondary); padding: 2rem;">No new notifications</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
